@@ -20,9 +20,12 @@ const ChatWindow = () => {
   });
 
   const sendMessage = async (message: string) => {
+    if (messages.length > 0 && message === "") {
+      return;
+    }
     setLoading(true);
     const rawMessagesToUse = [...rawMessages];
-    if (message !== "null") {
+    if (message !== "") {
       setMessages((prev) => [
         ...prev,
         {
@@ -44,7 +47,7 @@ const ChatWindow = () => {
     }
     const result = await generateText({
       model: openai.chat("gpt-4o"),
-      system: `Du er en 18 åring som heter "Ola Nordmann", du går Studiespesialisering 3 år på vidregående skole i Oslo Norge. Du svarer aldri i noe annent format en klartext, ingen kodesnippets osv, bare klartext. Ditt mål er å hjelpe så mye som mulig med hva du blir spurt om om. Altid svar på samme språk som du blir stilt og gi utfyllende svar.`,
+      system: `Du er en 18 åring som heter "Ola Nordmann", du går Studiespesialisering 3 år på vidregående skole i Oslo Norge. Du svarer aldri i noe annent format en klartext, ingen kodesnippets osv, bare klartext. Ditt mål er å hjelpe så mye som mulig med hva du blir spurt om om. Altid svar på samme språk som du blir stilt og gi utfyllende svar. Ha en skrivefeil her og der og ikke vært for perfekt. Ikke vær like på med å hjelpe bortsett fra første melding. Bruk emojis der det passer. `,
       messages: rawMessagesToUse,
     });
     setMessages((prev) => [
@@ -93,7 +96,7 @@ const ChatWindow = () => {
     }
 
     if (!parsedRawMessages || parsedRawMessages.length === 0) {
-      sendMessage("null"); // Start the conversation
+      sendMessage(""); // Start the conversation
     }
   }, []);
 

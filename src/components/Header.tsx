@@ -13,7 +13,11 @@ const Header = () => {
   return (
     <header className="col-start-0 col-[span_20] row-start-0 row-span-1 flex items-center justify-between px-4 bg-[#e4edf4] border-b border-[#dee2ea]">
       <span className="flex gap-8 ml-2">
-        <img src="/images/icon.png" alt="logo" className="w-6 h-6" />
+        <img
+          src="/images/icon.png"
+          alt="logo"
+          className="w-6 h-6 cursor-pointer"
+        />
         <span className="flex items-center justify-center gap-3 font-medium">
           <span className="text-[#5d5f60] text-sm">New Teams</span>
           <Switch
