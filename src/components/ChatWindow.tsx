@@ -1,5 +1,5 @@
 import { createOpenAI } from "@ai-sdk/openai";
-import { generateText } from "ai";
+import { CoreMessage, generateText } from "ai";
 import { useEffect, useRef, useState } from "react";
 import { faPaperPlane } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,6 +11,7 @@ const ChatWindow = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [messages, setMessages] = useState<TextSenderCorrelation[]>([]);
+  const [rawMessages, setRawMessages] = useState<CoreMessage[]>([]);
 
   const messagesViewRef = useRef<HTMLDivElement>(null);
 
@@ -20,22 +21,45 @@ const ChatWindow = () => {
 
   const sendMessage = async (message: string) => {
     setLoading(true);
-    setMessages((prev) => [
-      ...prev,
-      {
-        sender: SenderEnum.USER,
-        text: message,
-      },
-    ]);
+    const rawMessagesToUse = [...rawMessages];
+    if (message !== "null") {
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: SenderEnum.USER,
+          text: message,
+        },
+      ]);
+      setRawMessages((prev) => [
+        ...prev,
+        {
+          role: "user",
+          content: message,
+        },
+      ]);
+      rawMessagesToUse.push({
+        role: "user",
+        content: message,
+      });
+    }
     const result = await generateText({
-      model: openai.chat("gpt-3.5-turbo"),
-      prompt: message,
+      model: openai.chat("gpt-4o"),
+      system: `Du er en 18 åring som heter "Ola Nordmann", du går Studiespesialisering 3 år på vidregående skole i Oslo Norge. Du svarer aldri i noe annent format en klartext, ingen kodesnippets osv, bare klartext. Ditt mål er å hjelpe så mye som mulig med hva du blir spurt om om. Altid svar på samme språk som du blir stilt og gi utfyllende svar.`,
+      messages: rawMessagesToUse,
     });
     setMessages((prev) => [
       ...prev,
       {
         sender: SenderEnum.AI,
         text: result.text,
+      },
+    ]);
+
+    setRawMessages((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        content: result.text,
       },
     ]);
     setLoading(false);
@@ -49,12 +73,27 @@ const ChatWindow = () => {
     if (messages.length !== 0) {
       localStorage.setItem("messages", JSON.stringify(messages));
     }
-  }, [messages]);
+    if (rawMessages.length !== 0) {
+      localStorage.setItem("rawMessages", JSON.stringify(rawMessages));
+    }
+  }, [messages, rawMessages]);
 
   useEffect(() => {
     const messages = localStorage.getItem("messages");
+    const rawMessages = localStorage.getItem("rawMessages");
+
+    const parsedMessages = JSON.parse(messages as string);
+    const parsedRawMessages = JSON.parse(rawMessages as string);
+
     if (messages) {
-      setMessages(JSON.parse(messages));
+      setMessages(parsedMessages);
+    }
+    if (rawMessages) {
+      setRawMessages(parsedRawMessages);
+    }
+
+    if (!parsedRawMessages || parsedRawMessages.length === 0) {
+      sendMessage("null"); // Start the conversation
     }
   }, []);
 
@@ -110,7 +149,7 @@ const ChatWindow = () => {
           </div>
         ))}
         {loading && (
-          <div className="flex items-center justify-start gap-4">
+          <div className="flex items-center justify-start h-8 gap-4">
             <BouncingDotsLoader />
           </div>
         )}

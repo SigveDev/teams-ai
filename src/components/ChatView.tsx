@@ -1,8 +1,19 @@
-import { faPhone, faVideo } from "@fortawesome/free-solid-svg-icons";
+import { faPhone, faTrash, faVideo } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import ChatWindow from "./ChatWindow";
 
 const ChatView = () => {
+  const handleDeleteChat = () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete the chat?"
+    );
+    if (confirmDelete) {
+      localStorage.removeItem("messages");
+      localStorage.removeItem("rawMessages");
+      window.location.reload();
+    }
+  };
+
   return (
     <main className="col-[7_/_span_14] row-[2_/_span_15]">
       <div className="w-full h-16 border-b border-[#dee2ea] px-4 flex justify-between items-center">
@@ -17,13 +28,21 @@ const ChatView = () => {
             Chat
           </button>
         </span>
-        <span className="flex">
-          <button className="flex items-center gap-2 p-2 aspect-square text-[#5d5f60] rounded-l-md hover:text-black bg-white border-t border-l border-b border-[#d0d2d3]">
-            <FontAwesomeIcon icon={faVideo} />
+        <span className="flex gap-1">
+          <button
+            className="flex items-center gap-2 p-2 text-[#7d8386] hover:text-red-600"
+            onClick={handleDeleteChat}
+          >
+            <FontAwesomeIcon icon={faTrash} />
           </button>
-          <button className="flex items-center gap-2 p-2 aspect-square text-[#5d5f60] rounded-r-md hover:text-black bg-white border border-[#d0d2d3]">
-            <FontAwesomeIcon icon={faPhone} />
-          </button>
+          <span className="flex">
+            <button className="flex items-center gap-2 p-2 aspect-square text-[#5d5f60] rounded-l-md hover:text-black bg-white border-t border-l border-b border-[#d0d2d3]">
+              <FontAwesomeIcon icon={faVideo} />
+            </button>
+            <button className="flex items-center gap-2 p-2 aspect-square text-[#5d5f60] rounded-r-md hover:text-black bg-white border border-[#d0d2d3]">
+              <FontAwesomeIcon icon={faPhone} />
+            </button>
+          </span>
         </span>
       </div>
       <ChatWindow />
